@@ -27,6 +27,10 @@
     {
       "binding": "ANALYSES",
       "dataset": "ANALYSES"
+    },
+    {
+      "binding": "ANALYTICS",
+      "dataset": "FORUM_ANALYTICS"
     }
   ],
 
@@ -37,19 +41,27 @@
   "r2_buckets": [
     {
       "binding": "NEXT_INC_CACHE_R2_BUCKET",
-      "bucket_name": "prompt" // TODO: Replace with your actual R2 bucket name
+      "bucket_name": "prompt"
+    },
+    {
+      "binding": "STORAGE",
+      "bucket_name": "forum-storage"
     }
   ],
 
   /**
    * Durable Objects
-   * Used for the Revalidation Queue
+   * Used for the Revalidation Queue and Session Management
    */
   "durable_objects": {
     "bindings": [
       {
         "name": "NEXT_CACHE_DO_QUEUE",
         "class_name": "DOQueueHandler"
+      },
+      {
+        "name": "SESSIONS",
+        "class_name": "SessionManager"
       }
     ]
   },
@@ -57,7 +69,8 @@
     {
       "tag": "v1",
       "new_sqlite_classes": [
-        "DOQueueHandler"
+        "DOQueueHandler",
+        "SessionManager"
       ]
     }
   ],
@@ -69,8 +82,13 @@
   "d1_databases": [
     {
       "binding": "NEXT_TAG_CACHE_D1",
-      "database_id": "b464da3c-4a8a-4568-9c1a-785e02b130e8", // TODO: Replace with your D1 Database ID
-      "database_name": "db" // TODO: Replace with your D1 Database Name
+      "database_id": "b464da3c-4a8a-4568-9c1a-785e02b130e8",
+      "database_name": "db"
+    },
+    {
+      "binding": "DB",
+      "database_id": "forum-db-id",
+      "database_name": "forum_db"
     }
   ]
 }
