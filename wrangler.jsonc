@@ -23,10 +23,10 @@
    * Service Bindings
    * Needed for OpenNext self-referencing
    */
-  "services": [
+  "analytics_engine_datasets": [
     {
-      "binding": "WORKER_SELF_REFERENCE",
-      "service": "libok"
+      "binding": "ANALYSES",
+      "dataset": "ANALYSES"
     }
   ],
 
