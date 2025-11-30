@@ -8,16 +8,14 @@ import { purgeCache } from "@opennextjs/cloudflare/overrides/cache-purge/index";
 export default defineCloudflareConfig({
   incrementalCache: withRegionalCache(r2IncrementalCache, {
     mode: "long-lived",
-    // Setting `bypassTagCacheOnCacheHit` to `true` requires enabling cache purge
     bypassTagCacheOnCacheHit: true,
   }),
   queue: doQueue,
-  // This is only required if you use On-demand revalidation
   tagCache: doShardedTagCache({
     baseShardSize: 12,
-    regionalCache: true, // Enable regional cache to reduce the load on the DOs
-    regionalCacheTtlSec: 5, // The TTL for the regional cache
-    regionalCacheDangerouslyPersistMissingTags: true, // Enable this to persist missing tags in the regional cache
+    regionalCache: true,
+    regionalCacheTtlSec: 5,
+    regionalCacheDangerouslyPersistMissingTags: true,
     shardReplication: {
       numberOfSoftReplicas: 4,
       numberOfHardReplicas: 2,
@@ -26,8 +24,6 @@ export default defineCloudflareConfig({
       },
     },
   }),
-  // Disable this if you want to use PPR
   enableCacheInterception: true,
-  // you can also use the `durableObject` option to use a durable object as a cache purge
   cachePurge: purgeCache({ type: "direct" }),
 });

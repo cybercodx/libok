@@ -1,65 +1,43 @@
 import Link from 'next/link';
-import { getThreads, getCategories } from '@/lib/actions';
-import { getSessionUser } from '@/lib/auth';
+import { getThreads, getCategory, getCategories } from '@/lib/actions';
+import { notFound } from 'next/navigation';
 
 export const runtime = 'edge';
 
-export default async function Home() {
-  const threads = await getThreads();
-  const categories = await getCategories();
-  const user = await getSessionUser();
+export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const category = await getCategory(slug);
+
+  if (!category) notFound();
+
+  const threads = await getThreads(category.id);
+  const categoriesList = await getCategories();
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <div className="md:col-span-1 space-y-6">
-         {/* Categories Sidebar */}
          <div className="border border-green-900 bg-black p-4">
             <h3 className="text-lg font-bold text-green-500 mb-4 border-b border-green-900 pb-2">/ETC/CATEGORIES</h3>
             <div className="space-y-2">
                 <Link href="/" className="block text-green-400 hover:text-green-300 hover:bg-green-900/20 p-1">
                    [ALL_THREADS]
                 </Link>
-                {categories.map(cat => (
-                    <Link key={cat.id} href={`/category/${cat.slug}`} className="block text-green-400 hover:text-green-300 hover:bg-green-900/20 p-1">
+                {categoriesList.map(cat => (
+                    <Link key={cat.id} href={`/category/${cat.slug}`} className={`block text-green-400 hover:text-green-300 hover:bg-green-900/20 p-1 ${cat.slug === slug ? 'bg-green-900/30' : ''}`}>
                         [{cat.name.toUpperCase()}]
                     </Link>
                 ))}
             </div>
-         </div>
-
-         {/* User Status */}
-         <div className="border border-green-900 bg-black p-4">
-             <h3 className="text-lg font-bold text-green-500 mb-4 border-b border-green-900 pb-2">/USR/STATUS</h3>
-             {user ? (
-                 <div className="text-sm space-y-1">
-                     <p><span className="text-green-700">USER:</span> {user.username}</p>
-                     <p><span className="text-green-700">ROLE:</span> {user.role.toUpperCase()}</p>
-                     <p><span className="text-green-700">REP:</span> {user.reputation || 0}</p>
-                     <form action={async () => {
-                         'use server';
-                         const { destroySession } = await import('@/lib/auth');
-                         await destroySession();
-                     }}>
-                        <button className="mt-2 text-red-500 hover:underline">[LOGOUT]</button>
-                     </form>
-                 </div>
-             ) : (
-                 <div className="text-sm space-y-2">
-                     <p>GUEST_ACCESS</p>
-                     <Link href="/api/auth/github" className="block text-center bg-green-900 text-green-100 py-1 hover:bg-green-800">[LOGIN_GITHUB]</Link>
-                 </div>
-             )}
          </div>
       </div>
 
       <div className="md:col-span-3 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight text-green-500">
-            root@forum:~# ls -la /recent
+            root@forum:~# ls -la /category/{slug}
           </h1>
         </div>
 
-        {/* Threads List */}
         <div className="border border-green-900 rounded-none bg-black">
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-green-900 font-bold text-green-700 text-xs md:text-sm">
             <div className="col-span-8 md:col-span-7">TITLE</div>
@@ -77,7 +55,7 @@ export default async function Home() {
                     </Link>
                 </div>
                 <div className="text-xs text-green-700 mt-1">
-                    by {item.author} in <Link href={`/category/${item.categorySlug}`} className="hover:underline text-green-600">{item.category}</Link>
+                    by {item.author}
                 </div>
               </div>
               <div className="col-span-2 md:col-span-2 text-center text-xs text-green-600 flex flex-col justify-center">
@@ -90,7 +68,7 @@ export default async function Home() {
             </div>
           ))}
           {threads.length === 0 && (
-              <div className="p-8 text-center text-green-800">No threads found. Execute 'new_thread' to start.</div>
+              <div className="p-8 text-center text-green-800">No threads in this category.</div>
           )}
         </div>
       </div>
